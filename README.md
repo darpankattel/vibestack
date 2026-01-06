@@ -43,15 +43,30 @@ vibestack/
 - Make (optional)
 
 ### Services Overview
+### Auth Service (Port 8001)
+- User registration and authentication
+- JWT token management
+- User profile management
+
+Built with **Django** as a **JSON-only API**. All unnecessary components have been removed to keep the service lightweight and fast. Uses `auth_schema` of the main database.
+
+**Endpoints:**
+- `GET /auth/` - Health checks
+- `POST /auth/register/` - Register new user
+- `POST /auth/login/` - User login
+- `GET /auth/profile/` - Get user profile (protected)
+- `POST /auth/logout/` - Logout user
+
+
 ### Backend Service (Port 8002)
 
 Handles the core business logic, manages task orchestration, and coordinates with worker services.
 
-Built with **Django** as a **JSON-only API**. All unnecessary components have been removed to keep the service lightweight and fast, including template rendering, session handling, CORS middleware, admin, and authentication-related apps. The default renderer is configured to **JSON only**, ensuring consistent API responses.
+Built with **Django** as a **JSON-only API**. All unnecessary components have been removed to keep the service lightweight and fast, including template rendering, session handling, CORS middleware, admin, and authentication-related apps. The default renderer is configured to **JSON only**, ensuring consistent API responses. Uses `backend_schema` of the main database.
 
 **Endpoints:**
 
-* `GET /` - Health checks
+* `GET /api/` - Health checks
 * `POST /api/tasks/` — Create a background task
 * `GET /api/tasks/{id}/` — Retrieve task status
 * `GET /api/queue-info/` — Get queue metadata and health information

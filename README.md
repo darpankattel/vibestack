@@ -42,6 +42,25 @@ vibestack/
 - Docker Compose 2.0+
 - Make (optional)
 
+### Setup
+
+```bash
+# 1. Clone repository
+git clone https://github.com/darpankattel/vibestack.git
+cd vibestack
+
+# 2. Setup environment
+make setup
+# Edit .env file with your configuration
+
+# 3. Start services
+make dev-up
+
+# 5. Access applications
+# Dashboard: http://localhost/dashboard
+# Website: http://localhost/
+```
+
 ### Services Overview
 ### Auth Service (Port 8001)
 - User registration and authentication
@@ -71,7 +90,44 @@ Built with **Django** as a **JSON-only API**. All unnecessary components have be
 * `GET /api/tasks/{id}/` — Retrieve task status
 * `GET /api/queue-info/` — Get queue metadata and health information
 
+## Production Deployment
 
+### Build Production Images
+
+```bash
+make prod-up
+```
+
+### Production Configuration
+
+Key differences:
+- Gunicorn instead of Django runserver
+- No volume mounts (code in image)
+- Environment-based configuration
+- Multiple worker processes
+- Health checks enabled
+
+### Environment Variables
+
+Production `.env`:
+```env
+DJANGO_DEBUG=False
+DJANGO_SECRET_KEY=<generate-secure-key>
+POSTGRES_PASSWORD=<strong-password>
+REDIS_PASSWORD=<strong-password>
+DJANGO_ALLOWED_HOSTS=yourdomain.com
+```
+
+
+## Future Enhancements
+
+- [ ] Add CI/CD pipeline (GitHub Actions)
+- [ ] Add ELK stack for logging (Elasticsearch, Logstash, Kibana)
+- [ ] Add Prometheus + Grafana for monitoring
+- [ ] Implement CDN for static assets
+- [ ] Add RabbitMQ as alternative queue
+- [ ] Separate databases per service
+- [ ] Add API Gateway (Kong/Traefik)
 
 ## Contributing
 
@@ -88,7 +144,7 @@ MIT License - feel free to use this for learning!
 
 ## Acknowledgments
 
-Built as a project to learn:
+Built to just focus on code directly instead of design, as:
 - Microservices architecture
 - Docker containerization
 - Message queue systems

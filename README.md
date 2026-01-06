@@ -1,6 +1,6 @@
 # Vibestack - Microservices Architecture
 
-A complete microservices architecture built with Django, Express, Docker, Redis, and PostgreSQL to practice modern development concepts.
+A complete microservices architecture built with Django, Express, Docker, Redis, and PostgreSQL with modern development designs.
 
 ## Learning Objectives
 

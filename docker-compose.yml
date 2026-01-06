@@ -64,6 +64,27 @@ services:
     networks:
       - vibestack_net
 
+  async:
+    build:
+      context: ./services/async-service
+      dockerfile: Dockerfile
+      target: development
+    container_name: async_service
+    command: npm run start
+    volumes:
+      - ./services/async-service:/app
+      - /app/node_modules  # Anonymous volume
+    ports:
+      - "${ASYNC_SERVICE_PORT}:3000"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - vibestack_net
+    restart: unless-stopped
+
   # Nginx (Reverse Proxy & Static Files)
   nginx:
     build:
@@ -77,6 +98,8 @@ services:
       - ./frontend/website:/usr/share/nginx/html/website
     depends_on:
       - backend
+      - auth
+      - async
     networks:
       - vibestack_net
 

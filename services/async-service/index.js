@@ -24,6 +24,6 @@ app.get("/", (req, res) => {
   });
 });
 
-app.listen(8003, () => {
-  console.log("Async service on port 8003");
+app.listen(3000, () => {
+  console.log("Async service on port 3000");
 });

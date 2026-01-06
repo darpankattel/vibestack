@@ -2,7 +2,7 @@ name: vibestack_dev
 services:
   # PostgreSQL Database
   postgres:
-    image: postgres:15
+    image: postgres:18-alpine
     container_name: postgres_db
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -15,33 +15,12 @@ services:
       - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - vibestack_net
+    restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
-
-  # Backend Service
-  backend:
-    build:
-      context: ./services/backend
-      dockerfile: Dockerfile
-    container_name: backend_service
-    command: >
-      sh -c "python manage.py migrate && 
-             python manage.py runserver 0.0.0.0:8000"
-    volumes:
-      - ./services/backend:/app
-      - ./shared/python:/app/shared
-    ports:
-      - "${BACKEND_PORT}:8000"
-    env_file:
-      - .env
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - vibestack_net
 
   auth:
     build:
@@ -63,6 +42,43 @@ services:
         condition: service_healthy
     networks:
       - vibestack_net
+    restart: always
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+
+  # Backend Service
+  backend:
+    build:
+      context: ./services/backend
+      dockerfile: Dockerfile
+    container_name: backend_service
+    command: >
+      sh -c "python manage.py migrate && 
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./services/backend:/app
+      - ./shared/python:/app/shared
+    ports:
+      - "${BACKEND_PORT}:8000"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth:
+        condition: service_started
+    networks:
+      - vibestack_net
+    restart: always
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+
 
   async:
     build:
@@ -70,7 +86,7 @@ services:
       dockerfile: Dockerfile
       target: development
     container_name: async_service
-    command: npm run start
+    command: npm run dev
     volumes:
       - ./services/async-service:/app
       - /app/node_modules  # Anonymous volume
@@ -83,7 +99,12 @@ services:
         condition: service_healthy
     networks:
       - vibestack_net
-    restart: unless-stopped
+    restart: always
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
 
   # Nginx (Reverse Proxy & Static Files)
   nginx:
@@ -99,9 +120,9 @@ services:
     depends_on:
       - backend
       - auth
-      - async
     networks:
       - vibestack_net
+    restart: always
 
 networks:
   vibestack_net:

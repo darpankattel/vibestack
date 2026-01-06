@@ -1,0 +1,121 @@
+name: vibestack_prod
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:18-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "8004:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql # can remove after first run
+    networks:
+      - vibestack_net
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth:
+    build:
+      context: ./services/auth
+      dockerfile: Dockerfile
+      target: production
+    container_name: auth_service
+    command: gunicorn --bind 0.0.0.0:8000 --workers 4 auth.wsgi:application
+    ports:
+      - "${AUTH_PORT}:8000"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - vibestack_net
+    restart: always
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+
+  # Backend Service
+  backend:
+    build:
+      context: ./services/backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: backend_service
+    command: gunicorn --bind 0.0.0.0:8000 --workers 4 backend.wsgi:application
+    ports:
+      - "${BACKEND_PORT}:8000"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth:
+        condition: service_started
+    networks:
+      - vibestack_net
+    restart: always
+    healthcheck:
+      # test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      # interval: 10s
+      # timeout: 5s
+      # retries: 5
+
+  async:
+    build:
+      context: ./services/async-service
+      dockerfile: Dockerfile
+      target: production
+    container_name: async_service
+    ports:
+      - "${ASYNC_SERVICE_PORT}:3000"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - vibestack_net
+    restart: unless-stopped
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+
+  # Nginx (Reverse Proxy & Static Files)
+  nginx:
+    build:
+      context: ./infrastructure/nginx
+      dockerfile: Dockerfile
+    container_name: nginx_gateway
+    ports:
+      - "${NGINX_PORT}:80"
+      - "443:443"
+    volumes:
+      - ./frontend/dashboard:/usr/share/nginx/html/dashboard:ro
+      - ./frontend/website:/usr/share/nginx/html/website:ro
+    depends_on:
+      - backend
+      - auth
+    networks:
+      - vibestack_net
+    restart: always
+
+networks:
+  vibestack_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

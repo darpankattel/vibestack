@@ -14,14 +14,14 @@ help:
 setup:
 	@echo "Setting up project..."
 	@cp .env.example .env
-	@echo "✓ Created .env file"
+	@echo "Created .env file"
 	@echo "Please edit .env file with your configuration"
 	@echo "Then run: make dev-up"
 
 dev-up:
 	@echo "Starting development environment..."
 	docker-compose up -d
-	@echo "✓ Services started"
+	@echo "Services started"
 	@echo "Website: http://localhost"
 	@echo "Dashboard: http://localhost/dashboard"
 	@echo "Backend API: http://localhost/api/"
@@ -43,7 +43,7 @@ build:
 clean:
 	@echo "Cleaning up containers and volumes..."
 	docker-compose down -v
-	@echo "✓ Cleanup complete"
+	@echo "Cleanup complete"
 
 restart:
 	@echo "Restarting services..."
@@ -65,7 +65,7 @@ test:
 prod-up:
 	@echo "Starting production environment..."
 	docker-compose -f infrastructure/docker/docker-compose.prod.yml up -d
-	@echo "✓ Production services started"
+	@echo "Production services started"
 
 prod-down:
 	docker-compose -f infrastructure/docker/docker-compose.prod.yml down

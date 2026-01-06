@@ -18,16 +18,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Create app directory
 WORKDIR /app
 
-COPY . /app/
+COPY requirements.txt /app/
 
 # Install Python dependencies
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
-
-RUN mkdir -p /var/www/html/static && \
-    mkdir -p /var/www/html/media
-
-RUN python manage.py collectstatic --noinput
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser && \

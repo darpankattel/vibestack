@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Vibestack</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Dashboard</h1>
+            <nav>
+                <a href="/">Main Website</a>
+                <a href="/dashboard">Dashboard</a>
+            </nav>
+        </header>
+
+        <main>
+            <section class="auth-section">
+                <h2>Authentication</h2>
+                <div id="authStatus" class="status-box">Not logged in</div>
+
+                <div class="form-group">
+                    <h3>Register / Login</h3>
+                    <input type="text" id="username" placeholder="Username">
+                    <input type="email" id="email" placeholder="Email (for register)">
+                    <input type="password" id="password" placeholder="Password">
+                    <button onclick="register()">Register</button>
+                    <button onclick="login()">Login</button>
+                </div>
+            </section>
+
+            <section class="task-section">
+                <h2>Task Management</h2>
+                <div id="queueInfo" class="info-box">Loading queue info...</div>
+
+                <div class="form-group">
+                    <h3>Create Background Task</h3>
+                    <select id="taskType">
+                        <option value="default">Default Task</option>
+                        <option value="email">Email Task</option>
+                        <option value="data_processing">Data Processing</option>
+                    </select>
+                    <textarea id="taskData" placeholder='Task data (JSON): {"key": "value"}'></textarea>
+                    <button onclick="createTask()">Create Task</button>
+                </div>
+
+                <div class="form-group">
+                    <h3>Check Task Status</h3>
+                    <input type="text" id="taskId" placeholder="Task ID">
+                    <button onclick="checkTaskStatus()">Check Status</button>
+                </div>
+
+                <div id="taskResult" class="result-box"></div>
+            </section>
+
+            <section class="api-section">
+                <h2>API Endpoints</h2>
+                <div class="endpoint-list">
+                    <div class="endpoint">
+                        <strong>Auth Service:</strong> /auth/
+                        <button onclick="testEndpoint('/auth/')">Test</button>
+                    </div>
+                    <div class="endpoint">
+                        <strong>Backend Service:</strong> /api/
+                        <button onclick="testEndpoint('/api/')">Test</button>
+                    </div>
+                    <div class="endpoint">
+                        <strong>Queue Info:</strong> /api/queue-info/
+                        <button onclick="testEndpoint('/api/queue-info/')">Test</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

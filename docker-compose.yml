@@ -1,0 +1,68 @@
+name: vibestack_dev
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "8004:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - vibestack_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Service
+  backend:
+    build:
+      context: ./services/backend
+      dockerfile: Dockerfile
+    container_name: backend_service
+    command: >
+      sh -c "python manage.py migrate && 
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./services/backend:/app
+      - ./shared/python:/app/shared
+    ports:
+      - "${BACKEND_PORT}:8000"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - vibestack_net
+
+  # Nginx (Reverse Proxy & Static Files)
+  nginx:
+    build:
+      context: ./infrastructure/nginx
+      dockerfile: Dockerfile
+    container_name: nginx_gateway
+    ports:
+      - "${NGINX_PORT}:80"
+    volumes:
+      - ./frontend/dashboard:/usr/share/nginx/html/dashboard
+      - ./frontend/website:/usr/share/nginx/html/website
+    depends_on:
+      - backend
+    networks:
+      - vibestack_net
+
+networks:
+  vibestack_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
